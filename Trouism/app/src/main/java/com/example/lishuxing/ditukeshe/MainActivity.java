@@ -7,6 +7,9 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -83,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
             "地图模式【罗盘】 "};
     /* 当前地图定位模式的 Index */
     private int mCurrentStyle = 0;
+    private ImageView iv;
+    private Button btn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,9 +98,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 // 获取地图控件引用
         mMapView = (TextureMapView) findViewById(R.id.bmapView);
+        iv=(ImageView)findViewById(R.id.iv);
+        btn=(Button)findViewById(R.id.btn);
         initBaiduMap();
         initMyLocation ();
         initRadarSearch ();
+        iv.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                center2myLoc();
+            }
+        });
     }
 
     private void initRadarSearch() {
@@ -134,11 +148,7 @@ public class MainActivity extends AppCompatActivity {
         // 构建 Marker 图标
         int n;
         if(mUserID.equals("钢铁侠"))
-            n = R.drawable.gangtiexia;
-        else if(mUserID.equals("蝙蝠侠"))
-            n = R.drawable.bianfuxia;
-        else if(mUserID.equals("闪电侠"))
-            n = R.drawable.shandianxia;
+            n = R.drawable.location;
         else
             n = R.drawable.sishen;
         BitmapDescriptor bitmap = BitmapDescriptorFactory
