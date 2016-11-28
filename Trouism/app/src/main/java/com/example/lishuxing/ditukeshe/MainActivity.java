@@ -1,6 +1,7 @@
 package com.example.lishuxing.ditukeshe;
 
 import android.graphics.Color;
+import android.location.Geocoder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +26,7 @@ import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.GroundOverlayOptions;
 import com.baidu.mapapi.map.InfoWindow;
+import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
@@ -46,13 +49,29 @@ import com.baidu.mapapi.radar.RadarSearchListener;
 import com.baidu.mapapi.radar.RadarSearchManager;
 import com.baidu.mapapi.radar.RadarUploadInfo;
 import com.baidu.mapapi.radar.RadarUploadInfoCallback;
+import com.baidu.mapapi.search.core.RouteLine;
+import com.baidu.mapapi.search.core.SearchResult;
+import com.baidu.mapapi.search.geocode.GeoCodeOption;
+import com.baidu.mapapi.search.geocode.GeoCodeResult;
+import com.baidu.mapapi.search.geocode.GeoCoder;
+import com.baidu.mapapi.search.geocode.OnGetGeoCoderResultListener;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
+import com.baidu.mapapi.search.poi.PoiSearch;
+import com.baidu.mapapi.search.route.BikingRouteResult;
+import com.baidu.mapapi.search.route.DrivingRoutePlanOption;
+import com.baidu.mapapi.search.route.DrivingRouteResult;
+import com.baidu.mapapi.search.route.OnGetRoutePlanResultListener;
+import com.baidu.mapapi.search.route.PlanNode;
+import com.baidu.mapapi.search.route.RoutePlanSearch;
+import com.baidu.mapapi.search.route.TransitRouteResult;
+import com.baidu.mapapi.search.route.WalkingRouteResult;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements  BaiduMap.OnMapClickListener,OnGetRoutePlanResultListener{
     // 百度地图视图
     TextureMapView mMapView = null;
     // 百度地图控制器
@@ -88,6 +107,10 @@ public class MainActivity extends AppCompatActivity {
     private int mCurrentStyle = 0;
     private ImageView iv;
     private Button btn;
+    private EditText startEditText;
+    private EditText endEditText;
+    // 浏览路线节点相关
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,16 +123,65 @@ public class MainActivity extends AppCompatActivity {
         mMapView = (TextureMapView) findViewById(R.id.bmapView);
         iv=(ImageView)findViewById(R.id.iv);
         btn=(Button)findViewById(R.id.btn);
+// 初始化起点、终点输入框及搜索按钮
+        startEditText = (EditText) findViewById(R.id.editText1);
+        endEditText = (EditText) findViewById(R.id.editText2);
+
         initBaiduMap();
         initMyLocation ();
         initRadarSearch ();
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                search();
+            }
+        });
         iv.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 center2myLoc();
             }
         });
+
+
+
     }
+
+    private void search(){
+        RoutePlanSearch mSearch = RoutePlanSearch.newInstance();
+        OnGetRoutePlanResultListener listener=new OnGetRoutePlanResultListener() {
+            @Override
+            public void onGetWalkingRouteResult(WalkingRouteResult walkingRouteResult) {
+
+            }
+
+            @Override
+            public void onGetTransitRouteResult(TransitRouteResult transitRouteResult) {
+
+            }
+
+            @Override
+            public void onGetDrivingRouteResult(DrivingRouteResult drivingRouteResult) {
+
+            }
+
+            @Override
+            public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
+
+            }
+        };
+        mSearch.setOnGetRoutePlanResultListener(listener);
+        PlanNode stNode=PlanNode.withCityCodeAndPlaceName(1,"石家庄");
+        PlanNode enNode=PlanNode.withCityCodeAndPlaceName(1,"上海");
+        mSearch.drivingSearch(new DrivingRoutePlanOption()
+                .from(stNode)
+                .to(enNode)
+        );
+        mSearch.destroy();
+    }
+
+
+
 
     private void initRadarSearch() {
         // 获取周边雷达实例
@@ -296,6 +368,36 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+
+    }
+
+    @Override
+    public boolean onMapPoiClick(MapPoi mapPoi) {
+        return false;
+    }
+
+    @Override
+    public void onGetWalkingRouteResult(WalkingRouteResult walkingRouteResult) {
+
+    }
+
+    @Override
+    public void onGetTransitRouteResult(TransitRouteResult transitRouteResult) {
+
+    }
+
+    @Override
+    public void onGetDrivingRouteResult(DrivingRouteResult drivingRouteResult) {
+
+    }
+
+    @Override
+    public void onGetBikingRouteResult(BikingRouteResult bikingRouteResult) {
+
     }
 
     /**
